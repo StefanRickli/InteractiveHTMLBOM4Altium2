@@ -2899,7 +2899,9 @@ begin
 end;
 
 procedure PopulateStaticFields(Dummy: Integer);
-Begin
+var
+  Msg: String;
+begin
   LayerFilterCb.Items.Add('Both');
   LayerFilterCb.Items.Add('Top');
   LayerFilterCb.Items.Add('Bottom');
@@ -2908,6 +2910,10 @@ Begin
   FormatCb.Items.Add('JS');
   FormatCb.Items.Add('JSON Generic');
   FormatCb.Items.Add('run altium-ibom-releaser');
+
+  Msg := 'The "Value" column of the iBOM is special because it allows unit-aware sorting ("1.0n" comes after "1.0u").' + #13;
+  Msg := Msg + 'Select here which field of your components should be used for the "Value" column.';
+  ValueHelpIcn.Hint := Msg;
 end;
 
 function GetSelectedFields(Dummy: Integer): TStringList;
