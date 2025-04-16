@@ -49,7 +49,7 @@ object MainFrm: TMainFrm
     Height = 13
     Caption = 'Revision'
   end
-  object Label6: TLabel
+  object FieldSelectionLabel: TLabel
     Left = 16
     Top = 232
     Width = 142
@@ -69,12 +69,6 @@ object MainFrm: TMainFrm
     Width = 98
     Height = 13
     Caption = 'Override '#39'Value'#39' with'
-  end
-  object Shape1: TShape
-    Left = 316
-    Top = 15
-    Width = 65
-    Height = 65
   end
   object ValueHelpIcn: TImage
     Left = 272
