@@ -1399,7 +1399,14 @@ begin
   EdgeType := 'text';
   PnPout.Add('{');
   PnPout.Add('"pos":' + '[' + EdgeX1 + ',' + EdgeY1 + ']' + ',');
-  PnPout.Add('"text":' + JSONStrToStr(_String_(Prim.Text)) + ',');
+  if FormatIndex <> eFormatRunAltiumIbomReleaser then
+  begin
+    PnPout.Add('"text":' + JSONStrToStr(_String_(Prim.Text)) + ',');
+  end
+  else
+  begin
+    PnPout.Add('"text":' + JSONStrToStr(Prim.Text) + ',');
+  end;
   // svgpath
   // polygons
   PnPout.Add('"height":' + EdgeHeight + ',');
@@ -1938,8 +1945,15 @@ Begin
       PnPout.Add(',');
     PnPout.Add(JSONStrToStr(Nets[i]));
   end;
-  PnPout.Add('],');
-  PnPout.Add('"font_data": ' + FontData + '');
+  if FormatIndex <> eFormatRunAltiumIbomReleaser then
+  begin
+    PnPout.Add('],');
+    PnPout.Add('"font_data": ' + FontData + '');
+  end
+  else
+  begin
+    PnPout.Add(']');
+  end;
   PnPout.Add('},');
   PnPout.Add('"components": [' + Components + ']');
   PnPout.Add('}');
