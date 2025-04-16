@@ -50,6 +50,8 @@ procedure InitializeProject(Dummy: Integer); forward;
 function GetSelectedFields(Dummy: Integer): TStringList; forward;
 function GetSelectedGroupParameters(Dummy: Integer): TStringList; forward;
 function GetParameters_FromState(Dummy: Integer): String; forward;
+function AltiumIbomReleaserInstalled(Dummy: Integer): Boolean; forward;
+procedure DumpConfig(config: String); forward;
 
 { ..................................................................................................................... }
 { .                                              Global Variable Mapping                                              . }
@@ -2389,6 +2391,18 @@ begin
     tmp := PickAndPlaceOutputGeneric(FormatIndex < 2);
     DumpAsJSON(tmp);
   end
+  else if FormatIndex = eFormatRunAltiumIbomReleaser then
+  begin
+    // Produce output needed for altium-ibom-releaser, then call it
+    DumpConfig(GetParameters_FromState(0));
+    tmp := PickAndPlaceOutputGeneric(FormatIndex < 2);
+    DumpAsJSON(tmp);
+    ErrorCode := RunApplication('altium_ibom_releaser "' + TargetFolder + '"');
+    if ErrorCode <> 0 then
+    begin
+      ShowError('Error running altium_ibom_releaser: ' + IntToStr(ErrorCode));
+    end;
+  end
   else
   begin
     ShowMessage('Unknown format index: ' + IntToStr(FormatIndex));
@@ -2644,10 +2658,6 @@ end;
 
 Function GetParameters_FromState(Dummy: Integer): String;
 Begin
-  // First, need to update the state because the user might have changed
-  // settings in the form.
-  SetState_FromControls(0);
-
   Result := '';
   { Result := Result +       'ParameterName='        + ParameterName;
     Result := Result + '|' + 'VariantName='          + VariantName;
@@ -2728,6 +2738,20 @@ begin
   begin
     OutputFileNames.Add(GetOutputFileNameWithExtension('.json'));
   end
+  else if FormatIndex = eFormatRunAltiumIbomReleaser then
+  begin
+    if AltiumIbomReleaserInstalled(0) then
+    begin
+      OutputFileNames.Add(GetOutputFileNameWithExtension('.cfg'));
+      OutputFileNames.Add(GetOutputFileNameWithExtension('.json'));
+      OutputFileNames.Add(StringReplace(GetOutputFileNameWithExtension('.json'), '.json', '_patched.json', MkSet(rfReplaceAll)));
+      OutputFileNames.Add(GetOutputFileNameWithExtension('.html'));
+    end
+    else
+    begin
+      OutputFileNames.Add('Could not find altium-ibom-releaser in PATH');
+    end;
+  end
   else
   begin
     Result := 'Unknown format index "' + IntToStr(FormatIndex) + '"';
@@ -2755,6 +2779,9 @@ Begin
   Result := '';
   If MainFrm.ShowModal = mrOK Then
   Begin
+    // First, need to update the state because the user might have changed
+    // settings in the form.
+    SetState_FromControls(0);
     Result := GetParameters_FromState(0);
   end;
 end;
@@ -2880,6 +2907,7 @@ Begin
   FormatCb.Items.Add('HTML');
   FormatCb.Items.Add('JS');
   FormatCb.Items.Add('JSON Generic');
+  FormatCb.Items.Add('run altium-ibom-releaser');
 end;
 
 function GetSelectedFields(Dummy: Integer): TStringList;
@@ -2908,4 +2936,39 @@ begin
     s.Add(GroupParametersNames[i]);
   end;
   Result := s;
+end;
+
+
+{ ..................................................................................................................... }
+{ .                                                Altium iBOM Releaser                                               . }
+{ ..................................................................................................................... }
+
+{
+  Returns True if Altium iBOM Releaser is installed, False otherwise.
+}
+function AltiumIbomReleaserInstalled(Dummy: Integer): Boolean;
+var
+  ErrorCode: Integer;
+begin
+  Result := True;
+  ErrorCode := RunApplication('altium_ibom_releaser -h');
+  if ErrorCode <> 0 then
+  begin
+    Result := False;
+  end;
+end;
+
+{
+  The parameters/config will be used by altium-ibom-releaser
+  to determine the right command line arguments for InteractiveHtmlBom.
+}
+procedure DumpConfig(config: String);
+var
+  s: TStringList;
+  Data: String;
+begin
+  s := TStringList.Create;
+  s.Text := config;
+  s.SaveToFile(GetOutputFileNameWithExtension('.cfg'));
+  s.Free;
 end;
