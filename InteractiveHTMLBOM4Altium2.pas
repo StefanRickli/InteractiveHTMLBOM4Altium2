@@ -2914,6 +2914,11 @@ begin
   Msg := 'The "Value" column of the iBOM is special because it allows unit-aware sorting ("1.0n" comes after "1.0u").' + #13;
   Msg := Msg + 'Select here which field of your components should be used for the "Value" column.';
   ValueHelpIcn.Hint := Msg;
+
+  if FormatIndex = eFormatRunAltiumIbomReleaser then
+  begin
+    FieldSelectionLabel.Caption := 'Show Columns';
+  end;
 end;
 
 function GetSelectedFields(Dummy: Integer): TStringList;
@@ -2978,3 +2983,4 @@ begin
   s.SaveToFile(GetOutputFileNameWithExtension('.cfg'));
   s.Free;
 end;
+
